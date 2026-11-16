@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Class Group Maker</title>
+  <style>
+    :root {
+      --ink: #1c1917;
+      --muted: #5c574f;
+      --paper: #f4f0e8;
+      --card: #fffdf8;
+      --line: #d8d1c5;
+      --accent: #1f5a4c;
+      --accent-hover: #16463b;
+      --accent-soft: #e6f0ed;
+      --danger: #8a2f21;
+      --danger-soft: #f6e8e5;
+      --warn-bg: #f8efd8;
+      --warn-ink: #5c4308;
+      --shadow: 0 1px 2px rgba(28, 25, 23, 0.06), 0 8px 24px rgba(28, 25, 23, 0.06);
+      --print-cols: 4;
+      --print-name-size: 12pt;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      font-size: 17px;
+      line-height: 1.45;
+    }
+
+    body { min-height: 100vh; }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px 64px;
+    }
+
+    header.page-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px 24px;
+      margin-bottom: 20px;
+    }
+
+    header.page-head h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+    }
+
+    header.page-head p.tagline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .privacy {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    label.field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    label.field span.hint {
+      font-weight: 500;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      min-height: 44px;
+      width: 100%;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: 3px solid rgba(31, 90, 76, 0.35);
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+      line-height: 1.4;
+    }
+
+    .mode-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .mode-row label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      min-height: 44px;
+      cursor: pointer;
+    }
+
+    .mode-row input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .size-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: end;
+    }
+
+    .size-row .n-field {
+      width: 140px;
+      flex: 0 0 140px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 650;
+      border: 0;
+      border-radius: 10px;
+      min-height: 44px;
+      padding: 10px 16px;
+      cursor: pointer;
+      color: var(--ink);
+      background: #ece7de;
+      border: 1px solid var(--line);
+    }
+
+    button:hover { filter: brightness(0.97); }
+    button:focus-visible {
+      outline: 3px solid rgba(31, 90, 76, 0.35);
+      outline-offset: 1px;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    button.primary:hover { background: var(--accent-hover); }
+
+    button.print-btn {
+      background: #213547;
+      color: #fff;
+      border-color: #213547;
+    }
+
+    button.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-color: #e2c4be;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .status strong { color: var(--ink); }
+
+    .warning {
+      display: none;
+      background: var(--warn-bg);
+      color: var(--warn-ink);
+      border: 1px solid #e4d3a4;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 0 0 16px;
+    }
+
+    .warning.show { display: block; }
+
+    .sheet-head {
+      margin: 0 0 14px;
+    }
+
+    .sheet-head h2 {
+      margin: 0 0 4px;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .sheet-meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .group-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .group-card, .ungrouped-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .group-card.drag-over,
+    .ungrouped-card.drag-over {
+      outline: 3px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .group-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-top input.group-name {
+      font-weight: 700;
+      font-size: 1rem;
+      min-height: 40px;
+      padding: 6px 10px;
+      flex: 1;
+      background: #fff;
+    }
+
+    .group-count {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .students {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 36px;
+      flex: 1;
+    }
+
+    .student {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        "grip name"
+        "grip move";
+      align-items: center;
+      column-gap: 8px;
+      row-gap: 4px;
+      background: #f7f3ec;
+      border: 1px solid #e6e0d6;
+      border-radius: 8px;
+      padding: 6px 8px;
+      cursor: grab;
+      min-height: 44px;
+    }
+
+    .student:active { cursor: grabbing; }
+    .student.dragging { opacity: 0.45; }
+
+    .grip {
+      grid-area: grip;
+      color: #9a9388;
+      letter-spacing: -2px;
+      font-size: 14px;
+      user-select: none;
+      padding: 0 2px;
+      align-self: start;
+      line-height: 1.6;
+    }
+
+    .student .name {
+      grid-area: name;
+      font-weight: 600;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .move-wrap {
+      grid-area: move;
+      display: block;
+      min-width: 0;
+    }
+
+    .move {
+      width: 100%;
+      max-width: none;
+      min-height: 36px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .drop-hint {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin: 8px 0 0;
+    }
+
+    .empty-groups {
+      color: var(--muted);
+      padding: 28px 8px;
+      text-align: center;
+    }
+
+    footer.page-foot {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .print-only { display: none; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 700px) {
+      .row { grid-template-columns: 1fr; }
+      .wrap { padding: 16px 14px 48px; }
+      header.page-head h1 { font-size: 1.45rem; }
+    }
+
+    @media print {
+      :root { color-scheme: only light; }
+
+      @page {
+        size: letter portrait;
+        margin: 0.42in;
+      }
+
+      html, body {
+        background: #fff !important;
+        color: #000 !important;
+        font-size: 11pt;
+      }
+
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+
+      .wrap {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      #sheet {
+        display: flex;
+        flex-direction: column;
+        height: 10.16in;
+      }
+
+      .sheet-head {
+        margin: 0 0 8px;
+        flex: 0 0 auto;
+      }
+
+      .sheet-head h2 {
+        font-size: 16pt;
+        margin: 0 0 2px;
+        color: #000;
+      }
+
+      .sheet-meta {
+        color: #000;
+        font-size: 10pt;
+      }
+
+      .group-grid {
+        flex: 1 1 auto;
+        display: grid;
+        grid-template-columns: repeat(var(--print-cols, 4), 1fr);
+        grid-auto-rows: 1fr;
+        gap: 8px;
+        align-items: stretch;
+      }
+
+      .group-card, .ungrouped-card {
+        background: #fff !important;
+        color: #000 !important;
+        border: 1.6pt solid #000;
+        border-radius: 0;
+        box-shadow: none !important;
+        padding: 7px 8px;
+        min-height: 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .group-top input.group-name {
+        border: 0;
+        padding: 0;
+        min-height: 0;
+        font-size: 11pt;
+        font-weight: 700;
+        color: #000;
+        background: transparent;
+        pointer-events: none;
+      }
+
+      .group-count { color: #000; font-size: 8pt; }
+
+      .students { gap: 1px; min-height: 0; }
+
+      .student {
+        background: transparent !important;
+        border: 0;
+        border-radius: 0;
+        padding: 0 0 1px;
+        min-height: 0;
+        cursor: default;
+        box-shadow: none;
+      }
+
+      .student .name {
+        font-size: var(--print-name-size, 12pt);
+        font-weight: 600;
+        line-height: 1.25;
+        color: #000;
+      }
+
+      .grip, .move, .drop-hint { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="page-head no-print">
+      <h1>Class Group Maker</h1>
+      <p class="tagline">Make groups, then print a one-page sheet.</p>
+    </header>
+    <p class="privacy no-print">Names stay on this device. Nothing is uploaded anywhere.</p>
+
+    <section class="panel no-print" aria-label="Class and roster">
+      <div class="row">
+        <label class="field">Class or period name
+          <span class="hint">Optional</span>
+          <input type="text" id="className" maxlength="80" placeholder="Period 2" autocomplete="off">
+        </label>
+        <label class="field">Assignment title
+          <span class="hint">Optional</span>
+          <input type="text" id="assignment" maxlength="80" placeholder="ID Photo Project" autocomplete="off">
+        </label>
+      </div>
+
+      <label class="field" style="margin-top:16px">Student roster
+        <span class="hint">One name per line. You can also paste a comma- or tab-separated list, or a column from a spreadsheet.</span>
+        <textarea id="roster" placeholder="Student A
+Student B
+Student C" spellcheck="false" autocomplete="off"></textarea>
+      </label>
+
+      <div class="size-row" style="margin-top:16px">
+        <label class="field n-field">Number
+          <input type="number" id="groupN" min="1" max="60" step="1" value="4">
+        </label>
+        <div>
+          <div class="hint" style="font-weight:600;font-size:0.92rem;margin-bottom:2px">How to group</div>
+          <div class="mode-row">
+            <label><input type="radio" name="mode" value="size" checked> Make groups of this size</label>
+            <label><input type="radio" name="mode" value="count"> Make this many groups</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primary" id="btnRandom">Make random groups</button>
+        <button type="button" id="btnReshuffle" disabled>Reshuffle</button>
+        <button type="button" id="btnAdd" disabled>Add a group</button>
+        <button type="button" id="btnRemove" disabled>Remove a group</button>
+        <button type="button" class="print-btn" id="btnPrint" disabled>Print / Save as PDF</button>
+        <button type="button" class="danger" id="btnClear">Clear everything</button>
+      </div>
+    </section>
+
+    <p class="status no-print" id="status" hidden></p>
+    <div class="warning no-print" id="warning" role="status"></div>
+
+    <section id="sheet" aria-live="polite">
+      <div class="sheet-head" id="sheetHead" hidden>
+        <h2 id="sheetTitle">Class Groups</h2>
+        <div class="sheet-meta" id="sheetMeta"></div>
+      </div>
+      <div class="group-grid" id="grid">
+        <p class="empty-groups no-print" id="emptyState">Paste a roster and click <strong>Make random groups</strong> to start. You can then drag names between groups or use the Move menu on each name.</p>
+      </div>
+      <p class="drop-hint no-print" id="dropHint" hidden>Drag a name onto another group, or use the Move menu. Works on a Chromebook or tablet without dragging.</p>
+    </section>
+
+    <footer class="page-foot no-print">Class Group Maker. For posting or handing out group lists. Names are stored only in this browser, on this device, if you leave the page and come back.</footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "class-group-maker-v1";
+
+      var state = {
+        className: "",
+        assignment: "",
+        rosterText: "",
+        mode: "size",
+        n: 4,
+        groups: [],
+        ungrouped: []
+      };
+
+      var els = {
+        className: document.getElementById("className"),
+        assignment: document.getElementById("assignment"),
+        roster: document.getElementById("roster"),
+        groupN: document.getElementById("groupN"),
+        status: document.getElementById("status"),
+        warning: document.getElementById("warning"),
+        grid: document.getElementById("grid"),
+        sheetHead: document.getElementById("sheetHead"),
+        sheetTitle: document.getElementById("sheetTitle"),
+        sheetMeta: document.getElementById("sheetMeta"),
+        dropHint: document.getElementById("dropHint"),
+        btnRandom: document.getElementById("btnRandom"),
+        btnReshuffle: document.getElementById("btnReshuffle"),
+        btnAdd: document.getElementById("btnAdd"),
+        btnRemove: document.getElementById("btnRemove"),
+        btnPrint: document.getElementById("btnPrint"),
+        btnClear: document.getElementById("btnClear")
+      };
+
+      function randInt(maxExclusive) {
+        if (maxExclusive <= 1) return 0;
+        var buf = new Uint32Array(1);
+        var limit = Math.floor(0x100000000 / maxExclusive) * maxExclusive;
+        var x;
+        do {
+          crypto.getRandomValues(buf);
+          x = buf[0];
+        } while (x >= limit);
+        return x % maxExclusive;
+      }
+
+      function shuffle(list) {
+        var a = list.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = randInt(i + 1);
+          var t = a[i];
+          a[i] = a[j];
+          a[j] = t;
+        }
+        return a;
+      }
+
+      function newId() {
+        var buf = new Uint32Array(2);
+        crypto.getRandomValues(buf);
+        return "g-" + buf[0].toString(36) + buf[1].toString(36);
+      }
+
+      function parseRoster(text) {
+        var raw = String(text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+        var tokens = [];
+        if (!raw) return { names: [], duplicates: [] };
+
+        var lines = raw.split("\n");
+        var hasNewlines = lines.length > 1;
+
+        if (hasNewlines) {
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].trim();
+            if (!line) continue;
+            if (line.indexOf("\t") !== -1) {
+              var cells = line.split("\t");
+              for (var c = 0; c < cells.length; c++) {
+                var cell = cells[c].trim();
+                if (cell) { tokens.push(cell); break; }
+              }
+            } else if (line.indexOf(",") !== -1 && line.split(",").length > 2) {
+              var parts = line.split(",");
+              for (var p = 0; p < parts.length; p++) {
+                var part = parts[p].trim();
+                if (part) tokens.push(part);
+              }
+            } else {
+              tokens.push(line);
+            }
+          }
+        } else if (raw.indexOf("\t") !== -1) {
+          raw.split("\t").forEach(function (s) { if (s.trim()) tokens.push(s.trim()); });
+        } else if (raw.indexOf(",") !== -1) {
+          raw.split(",").forEach(function (s) { if (s.trim()) tokens.push(s.trim()); });
+        } else {
+          tokens.push(raw);
+        }
+
+        var seen = Object.create(null);
+        var names = [];
+        var duplicates = [];
+        for (var n = 0; n < tokens.length; n++) {
+          var name = tokens[n];
+          var key = name.toLowerCase();
+          if (seen[key]) duplicates.push(name);
+          else { seen[key] = true; names.push(name); }
+        }
+        return { names: names, duplicates: duplicates };
+      }
+
+      function targetGroupCount(total, mode, n) {
+        if (total <= 0) return 0;
+        if (mode === "count") return Math.max(1, Math.min(n, total));
+        if (total <= n) return 1;
+        return Math.max(1, Math.round(total / n));
+      }
+
+      function deal(names, groupCount, keepNames) {
+        var total = names.length;
+        groupCount = Math.max(1, Math.min(groupCount, total));
+        var shuffled = shuffle(names);
+        var base = Math.floor(total / groupCount);
+        var extra = total % groupCount;
+        var groups = [];
+        var i = 0;
+        for (var g = 0; g < groupCount; g++) {
+          var size = base + (g < extra ? 1 : 0);
+          var label = (keepNames && keepNames[g]) ? keepNames[g] : ("Group " + (g + 1));
+          groups.push({
+            id: newId(),
+            name: label,
+            members: shuffled.slice(i, i + size)
+          });
+          i += size;
+        }
+        return groups;
+      }
+
+      function allAssignedNames() {
+        var out = [];
+        state.groups.forEach(function (g) {
+          g.members.forEach(function (n) { out.push(n); });
+        });
+        state.ungrouped.forEach(function (n) { out.push(n); });
+        return out;
+      }
+
+      function readForm() {
+        state.className = els.className.value.trim();
+        state.assignment = els.assignment.value.trim();
+        state.rosterText = els.roster.value;
+        state.n = Math.max(1, parseInt(els.groupN.value, 10) || 1);
+        var modeEl = document.querySelector('input[name="mode"]:checked');
+        state.mode = modeEl ? modeEl.value : "size";
+      }
+
+      function showWarning(msg) {
+        if (!msg) {
+          els.warning.classList.remove("show");
+          els.warning.textContent = "";
+          return;
+        }
+        els.warning.textContent = msg;
+        els.warning.classList.add("show");
+      }
+
+      function todayLabel() {
+        return new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        });
+      }
+
+      function setPrintVars() {
+        var printable = state.groups.filter(function (g) { return g.members.length; });
+        if (state.ungrouped.length) {
+          printable = printable.concat([{ members: state.ungrouped }]);
+        }
+        var count = printable.length;
+        var cols = 1;
+        if (count >= 2) cols = 2;
+        if (count >= 5) cols = 3;
+        if (count >= 7) cols = 4;
+        if (count >= 13) cols = 5;
+        var maxMembers = 0;
+        printable.forEach(function (g) {
+          if (g.members.length > maxMembers) maxMembers = g.members.length;
+        });
+        var rows = Math.max(1, Math.ceil(count / cols));
+        var namePt = 13;
+        if (rows >= 3 || maxMembers >= 6) namePt = 12;
+        if (rows >= 3 && maxMembers >= 6) namePt = 11;
+        if (count >= 8 && maxMembers >= 5) namePt = 11;
+        if (count >= 8 && maxMembers >= 7) namePt = 10;
+        if (count >= 12 || maxMembers >= 10) namePt = 9;
+        if (count >= 16) namePt = 8;
+        document.documentElement.style.setProperty("--print-cols", String(cols));
+        document.documentElement.style.setProperty("--print-name-size", namePt + "pt");
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function moveOptions(currentId, studentName) {
+        var html = '<option value="">Move to…</option>';
+        state.groups.forEach(function (g) {
+          if (g.id === currentId) return;
+          html += '<option value="' + escapeHtml(g.id) + '">' + escapeHtml(g.name) + "</option>";
+        });
+        if (currentId !== "ungrouped") {
+          html += '<option value="ungrouped">Ungrouped</option>';
+        }
+        return html;
+      }
+
+      function studentRow(name, currentId) {
+        return (
+          '<div class="student" draggable="true" data-name="' + escapeHtml(name) + '" data-from="' + escapeHtml(currentId) + '">' +
+            '<span class="grip" aria-hidden="true">⋮⋮</span>' +
+            '<span class="name">' + escapeHtml(name) + "</span>" +
+            '<label class="move-wrap">' +
+              '<span class="visually-hidden">Move ' + escapeHtml(name) + " to</span>" +
+              '<select class="move" data-name="' + escapeHtml(name) + '" data-from="' + escapeHtml(currentId) + '" aria-label="Move ' + escapeHtml(name) + ' to another group">' +
+                moveOptions(currentId, name) +
+              "</select>" +
+            "</label>" +
+          "</div>"
+        );
+      }
+
+      function render() {
+        var assigned = allAssignedNames();
+        var hasGroups = state.groups.length > 0 || state.ungrouped.length > 0;
+
+        els.btnReshuffle.disabled = !hasGroups;
+        els.btnAdd.disabled = !hasGroups;
+        els.btnRemove.disabled = state.groups.length === 0;
+        els.btnPrint.disabled = assigned.length === 0;
+
+        if (assigned.length) {
+          var bits = [];
+          bits.push("<strong>" + assigned.length + "</strong> student" + (assigned.length === 1 ? "" : "s"));
+          bits.push("<strong>" + state.groups.length + "</strong> group" + (state.groups.length === 1 ? "" : "s"));
+          if (state.ungrouped.length) {
+            bits.push("<strong>" + state.ungrouped.length + "</strong> ungrouped");
+          }
+          els.status.innerHTML = bits.join(" · ");
+          els.status.hidden = false;
+        } else {
+          els.status.hidden = true;
+        }
+
+        var title = state.assignment || "Class Groups";
+        els.sheetTitle.textContent = title;
+        var meta = [];
+        if (state.className) meta.push(state.className);
+        meta.push(todayLabel());
+        els.sheetMeta.textContent = meta.join("  ·  ");
+        els.sheetHead.hidden = !hasGroups;
+
+        if (!hasGroups) {
+          els.grid.innerHTML = '<p class="empty-groups no-print" id="emptyState">Paste a roster and click <strong>Make random groups</strong> to start. You can then drag names between groups or use the Move menu on each name.</p>';
+          els.dropHint.hidden = true;
+          setPrintVars();
+          return;
+        }
+
+        var html = "";
+        state.groups.forEach(function (g) {
+          html += '<article class="group-card' + (g.members.length ? '' : ' no-print') + '" data-group="' + escapeHtml(g.id) + '">';
+          html += '<div class="group-top">';
+          html += '<input type="text" class="group-name" data-group="' + escapeHtml(g.id) + '" value="' + escapeHtml(g.name) + '" maxlength="40" aria-label="Group name">';
+          html += '<span class="group-count">' + g.members.length + "</span>";
+          html += "</div>";
+          html += '<div class="students" data-group="' + escapeHtml(g.id) + '">';
+          g.members.forEach(function (n) { html += studentRow(n, g.id); });
+          html += "</div></article>";
+        });
+
+        if (state.ungrouped.length) {
+          html += '<article class="ungrouped-card" data-group="ungrouped">';
+          html += '<div class="group-top">';
+          html += '<input type="text" class="group-name" value="Ungrouped" readonly aria-label="Ungrouped">';
+          html += '<span class="group-count">' + state.ungrouped.length + "</span>";
+          html += "</div>";
+          html += '<div class="students" data-group="ungrouped">';
+          state.ungrouped.forEach(function (n) { html += studentRow(n, "ungrouped"); });
+          html += "</div></article>";
+        }
+
+        els.grid.innerHTML = html;
+        els.dropHint.hidden = false;
+        bindGrid();
+        setPrintVars();
+      }
+
+      function findGroup(id) {
+        for (var i = 0; i < state.groups.length; i++) {
+          if (state.groups[i].id === id) return state.groups[i];
+        }
+        return null;
+      }
+
+      function takeStudent(name) {
+        var i;
+        for (i = 0; i < state.groups.length; i++) {
+          var idx = state.groups[i].members.indexOf(name);
+          if (idx !== -1) {
+            state.groups[i].members.splice(idx, 1);
+            return true;
+          }
+        }
+        var u = state.ungrouped.indexOf(name);
+        if (u !== -1) {
+          state.ungrouped.splice(u, 1);
+          return true;
+        }
+        return false;
+      }
+
+      function placeStudent(name, destId) {
+        if (!takeStudent(name)) return;
+        if (destId === "ungrouped") {
+          state.ungrouped.push(name);
+        } else {
+          var g = findGroup(destId);
+          if (g) g.members.push(name);
+          else state.ungrouped.push(name);
+        }
+        persist();
+        render();
+      }
+
+      function bindGrid() {
+        els.grid.querySelectorAll(".group-name").forEach(function (input) {
+          if (input.readOnly) return;
+          input.addEventListener("change", function () {
+            var g = findGroup(input.getAttribute("data-group"));
+            if (!g) return;
+            var next = input.value.trim() || g.name;
+            g.name = next;
+            input.value = next;
+            persist();
+            render();
+          });
+        });
+
+        els.grid.querySelectorAll("select.move").forEach(function (sel) {
+          sel.addEventListener("change", function () {
+            var dest = sel.value;
+            var name = sel.getAttribute("data-name");
+            if (!dest || !name) { sel.value = ""; return; }
+            placeStudent(name, dest);
+          });
+        });
+
+        els.grid.querySelectorAll(".student").forEach(function (row) {
+          row.addEventListener("dragstart", function (e) {
+            row.classList.add("dragging");
+            e.dataTransfer.setData("text/plain", row.getAttribute("data-name"));
+            e.dataTransfer.effectAllowed = "move";
+          });
+          row.addEventListener("dragend", function () {
+            row.classList.remove("dragging");
+            els.grid.querySelectorAll(".drag-over").forEach(function (el) {
+              el.classList.remove("drag-over");
+            });
+          });
+        });
+
+        els.grid.querySelectorAll(".group-card, .ungrouped-card").forEach(function (card) {
+          card.addEventListener("dragover", function (e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            card.classList.add("drag-over");
+          });
+          card.addEventListener("dragleave", function (e) {
+            if (!card.contains(e.relatedTarget)) card.classList.remove("drag-over");
+          });
+          card.addEventListener("drop", function (e) {
+            e.preventDefault();
+            card.classList.remove("drag-over");
+            var name = e.dataTransfer.getData("text/plain");
+            var dest = card.getAttribute("data-group");
+            if (name && dest) placeStudent(name, dest);
+          });
+        });
+      }
+
+      function persist() {
+        try {
+          var payload = {
+            className: els.className.value,
+            assignment: els.assignment.value,
+            rosterText: els.roster.value,
+            mode: state.mode,
+            n: state.n,
+            groups: state.groups,
+            ungrouped: state.ungrouped
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        } catch (err) {}
+      }
+
+      function restore() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return false;
+          var data = JSON.parse(raw);
+          if (data.className) els.className.value = data.className;
+          if (data.assignment) els.assignment.value = data.assignment;
+          if (data.rosterText) els.roster.value = data.rosterText;
+          if (data.n) els.groupN.value = data.n;
+          if (data.mode) {
+            var radio = document.querySelector('input[name="mode"][value="' + data.mode + '"]');
+            if (radio) radio.checked = true;
+          }
+          state.groups = Array.isArray(data.groups) ? data.groups : [];
+          state.ungrouped = Array.isArray(data.ungrouped) ? data.ungrouped : [];
+          state.n = data.n || 4;
+          state.mode = data.mode || "size";
+          state.className = (data.className || "").trim();
+          state.assignment = (data.assignment || "").trim();
+          return state.groups.length > 0 || state.ungrouped.length > 0;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      function makeRandom(reuseNames) {
+        readForm();
+        var parsed = parseRoster(els.roster.value);
+        if (!parsed.names.length) {
+          showWarning("Add at least one student name first.");
+          return;
+        }
+        var warn = "";
+        if (parsed.duplicates.length) {
+          warn = "Removed " + parsed.duplicates.length + " duplicate name" +
+            (parsed.duplicates.length === 1 ? "" : "s") + ": " + parsed.duplicates.join(", ") + ".";
+        }
+        showWarning(warn);
+
+        var count;
+        var keepNames = null;
+        if (reuseNames && state.groups.length) {
+          count = Math.max(1, Math.min(state.groups.length, parsed.names.length));
+          keepNames = state.groups.map(function (g) { return g.name; });
+        } else {
+          count = targetGroupCount(parsed.names.length, state.mode, state.n);
+        }
+        state.groups = deal(parsed.names, count, keepNames);
+        state.ungrouped = [];
+        persist();
+        render();
+      }
+
+      els.btnRandom.addEventListener("click", function () { makeRandom(false); });
+      els.btnReshuffle.addEventListener("click", function () { makeRandom(true); });
+
+      els.btnAdd.addEventListener("click", function () {
+        var nextNum = state.groups.length + 1;
+        state.groups.push({ id: newId(), name: "Group " + nextNum, members: [] });
+        persist();
+        render();
+      });
+
+      els.btnRemove.addEventListener("click", function () {
+        if (!state.groups.length) return;
+        var last = state.groups.pop();
+        last.members.forEach(function (n) { state.ungrouped.push(n); });
+        persist();
+        render();
+      });
+
+      els.btnPrint.addEventListener("click", function () {
+        setPrintVars();
+        window.print();
+      });
+
+      els.btnClear.addEventListener("click", function () {
+        if (!window.confirm("Clear the roster, groups, and saved data on this device?")) return;
+        try { localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+        els.className.value = "";
+        els.assignment.value = "";
+        els.roster.value = "";
+        els.groupN.value = "4";
+        var sizeRadio = document.querySelector('input[name="mode"][value="size"]');
+        if (sizeRadio) sizeRadio.checked = true;
+        state = { className: "", assignment: "", rosterText: "", mode: "size", n: 4, groups: [], ungrouped: [] };
+        showWarning("");
+        render();
+      });
+
+      ["change", "input"].forEach(function (evt) {
+        els.className.addEventListener(evt, function () { readForm(); persist(); if (state.groups.length) render(); });
+        els.assignment.addEventListener(evt, function () { readForm(); persist(); if (state.groups.length) render(); });
+        els.roster.addEventListener(evt, persist);
+        els.groupN.addEventListener(evt, persist);
+      });
+      document.querySelectorAll('input[name="mode"]').forEach(function (r) {
+        r.addEventListener("change", persist);
+      });
+
+      window.addEventListener("beforeprint", setPrintVars);
+
+      if (restore()) render();
+      else render();
+    })();
+  </script>
+</body>
+</html>
